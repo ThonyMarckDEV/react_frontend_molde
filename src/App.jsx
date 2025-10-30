@@ -22,6 +22,7 @@ import Home from 'ui/home/Home';
 
 
 // UIS ADMIN
+import ListarRoles from 'ui/Administrador/roles/listarRoles/ListarRoles';
 
 
 // UIS USUARIO
@@ -52,10 +53,8 @@ function AppContent() {
         {/* Ruta Home (cuando solo pones /admin) */}
         <Route index element={<Home />} />
 
-        {/* Ruta Solicitar Préstamo */}
-        
-
-        {/* Aquí agregas más módulos */}
+        {/* Ruta Listar Roles */}
+        <Route path="listar-roles" element={<ListarRoles />} />
 
       </Route>
 

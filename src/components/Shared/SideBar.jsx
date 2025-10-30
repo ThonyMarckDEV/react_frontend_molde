@@ -3,24 +3,15 @@ import { Link, useLocation } from 'react-router-dom';
 import { Bars3Icon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
-import logo from 'assets/img/munipiuralogo.png';
+//import logo from 'assets/img/logo.png';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 
 const menus = {
     admin: [
-        { section: 'Dashboard', link: '/admin/dashboard' },
         { 
-            section: 'Contadores', 
+            section: 'Roles', 
             subs: [
-                { name: 'Agregar Contador', link: '/admin/agregar-contador' },
-                { name: 'Listar Contadores', link: '/admin/listar-contadores' },
-            ],
-        },
-        {
-            section: 'Jefes de Contabilidad',
-            subs: [
-                { name: 'Agregar Jefe', link: '/admin/agregar-jefe' },
-                { name: 'Listar Jefes', link: '/admin/listar-jefes' },
+                { name: 'Listar Roles', link: '/admin/listar-roles' },
             ],
         },
     ],
@@ -109,14 +100,14 @@ const Sidebar = () => {
                 {/* Top half: White with image */}
                 <div className="h-1/4 bg-white flex items-center justify-center">
                     <img
-                        src={logo}
+                        src={''}
                         alt="Logo"
                         className="h-36 w-auto"
                     />
                 </div>
 
                 {/* Bottom half: Red with menu */}
-                <div className="h-3/4 bg-black overflow-y-auto p-4 flex flex-col">
+                <div className="h-3/4 bg-gray-500 overflow-y-auto p-4 flex flex-col">
                     <nav className="space-y-2 flex-grow">
                         {roleMenu.map((item, index) => {
                             const isActive = isSectionActive(item); 
@@ -128,7 +119,7 @@ const Sidebar = () => {
                                         <>
                                             <button
                                                 className={`w-full flex items-center justify-between py-2 px-4 rounded-md transition focus:outline-none 
-                                                            ${isActive ? 'bg-black text-white' : 'text-white hover:bg-gray-400'}`} 
+                                                            ${isActive ? 'bg-gray-600 text-white' : 'text-white hover:bg-gray-400'}`} 
                                                 onClick={() => toggleSection(item.section)}
                                             >
                                                 <span>{item.section}</span>

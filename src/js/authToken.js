@@ -3,107 +3,67 @@ import API_BASE_URL from './urlHelper';
 import jwtUtils from 'utilities/Token/jwtUtils';
 
 /**
- * Valida el refresh token (string) contra el backend.
- * Comprueba si el token existe en la BBDD y no ha sido revocado o expirado.
+ * Valida la sesión actual contra el backend.
+ * Envía ambos tokens. El backend decide si son válidos.
+ * Si el access_token está expirado, el backend lo renovará
+ * y lo devolverá en la respuesta.
  */
-async function validateRefreshToken() {
+async function verificarYRenovarToken() {
+  console.log('[Token] Verificando sesión con el backend...');
+  
+  const access_token = jwtUtils.getAccessTokenFromCookie();
+  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+
+  // Si faltan tokens localmente, no tiene sentido llamar al backend.
+  if (!access_token || !refresh_token) {
+    console.log('[Token] No se encontraron tokens locales. Sesión finalizada.');
+    logout(); // Ejecuta el logout
+    throw new Error('Tokens no encontrados');
+  }
+
   try {
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    
-    if (!refresh_token) {
-      console.log('[Token] No se encontró refresh token');
-      return false;
-    }
-    
-    const response = await axios.post(`${API_BASE_URL}/api/validate-refresh-token`, {
+    // Única llamada al backend para validar y/o refrescar
+    const response = await axios.post(`${API_BASE_URL}/api/validate-tokens`, {
+      access_token,
       refresh_token
     });
-    
-    return response.data.valid;
-  } catch (error) {
-    console.error('[Token] Error al validar refresh token:', error.message);
-    return false;
-  }
-}
 
-async function refreshAccessToken() {
-  // console.log('[Token] Iniciando renovación del access token...');
-  try {
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    //console.log('[Token] Refresh token obtenido de cookies');
-    
-    const response = await axios.post(`${API_BASE_URL}/api/refresh`, { refresh_token });
-    //console.log('[Token] Respuesta del servidor recibida');
-    
-    const newAccessToken = response.data.access_token;
-    jwtUtils.setAccessTokenInCookie(newAccessToken);
-    // console.log('[Token] Nuevo access token guardado en cookies');
-    
-    return newAccessToken;
-  } catch (error) {
-    //console.error('[Token] Error al refrescar el token:', error.message);
-    //console.log('[Token] Ejecutando logout...');
-    logout();
-    throw error;
-  }
-}
+    const { valid, access_token: newAccessToken } = response.data;
 
-function isTokenExpired(token) {
-  if (!token) {
-    // console.log('[Token] No se encontró token');
-    return true;
-  }
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    //const expiraEn = new Date(payload.exp * 1000).toLocaleTimeString();
-    // console.log(`[Token] Expiración: ${expiraEn}`);
-    
-    const expirado = payload.exp * 1000 < Date.now();
-    // if (expirado) console.log('[Token] Token expirado');
-    // else console.log('[Token] Token aún válido');
-    
-    return expirado;
-  } catch (error) {
-    // console.error('[Token] Error al decodificar token:', error.message);
-    return true;
-  }
-}
-
-async function verificarYRenovarToken() {
-  // console.log('[Token] Verificando estado del token...');
-  
-  // Primero verificar si el refresh token sigue siendo válido en la BBDD
-  const isValidRefreshToken = await validateRefreshToken(); // CAMBIO: Se usa la nueva función
-  if (!isValidRefreshToken) {
-    console.log('[Token] Refresh token no válido. Posible inicio de sesión en otro dispositivo o sesión expirada.'); // CAMBIO: Mensaje actualizado
-    logout();
-    throw new Error('Sesión cerrada por inicio de sesión en otro dispositivo o sesión expirada');
-  }
-  
-  let access_token = jwtUtils.getAccessTokenFromCookie();
-  
-  if (isTokenExpired(access_token)) {
-    // console.log('[Token] Access token expirado. Verificando refresh token...');
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    
-    if (isTokenExpired(refresh_token)) {
-      // console.log('[Token] Refresh token también expirado. Sesión finalizada');
+    // Si el backend dice que no es válido (aunque devuelva 200)
+    if (!valid) {
+      console.log('[Token] Backend reportó sesión no válida.');
       logout();
-      throw new Error('Sesión expirada');
+      throw new Error('Sesión no válida reportada por el backend');
     }
-    
-    // console.log('[Token] Refresh token válido. Solicitando nuevo access token...');
-    access_token = await refreshAccessToken();
-    // console.log('[Token] Nuevo access token recibido:', access_token?.substring(0, 15) + '...');
-  } else {
-    // console.log('[Token] Access token aún válido. No se requiere renovación');
+
+    // Si el backend nos dio un nuevo access token, lo guardamos
+    if (newAccessToken) {
+      console.log('[Token] Access token renovado por el backend.');
+      jwtUtils.setAccessTokenInCookie(newAccessToken);
+      return newAccessToken; // Devolvemos el nuevo
+    }
+
+    // Si no vino uno nuevo, el original sigue siendo válido
+    console.log('[Token] Sesión validada. Access token sigue vigente.');
+    return access_token; // Devolvemos el original
+
+  } catch (error) {
+    // Cualquier error (401, 403, 500) significa que la sesión es inválida
+    console.error('[Token] Error al validar tokens con backend:', error.response?.data?.message || error.message);
+    logout();
+    throw new Error('Sesión inválida o expirada');
   }
-  
-  return access_token;
 }
 
+/**
+ * Función wrapper para hacer fetch asegurando que el token es válido.
+ */
 async function fetchWithAuth(url, options = {}) {
-  //console.log(`[API] Solicitud a: ${url}`);
+  // console.log(`[API] Solicitud a: ${url}`);
+  
+  // Esta función ahora se encarga de todo: validar, renovar si es necesario,
+  // o hacer logout y lanzar un error si la sesión es inválida.
   const access_token = await verificarYRenovarToken();
   
   // console.log('[API] Enviando solicitud con token:', access_token?.substring(0, 15) + '...');
@@ -115,9 +75,22 @@ async function fetchWithAuth(url, options = {}) {
   return fetch(url, { ...options, headers });
 }
 
+/**
+ * Cierra la sesión del usuario eliminando tokens y redirigiendo.
+ */
 function logout() {
+  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+  
+  // Intenta notificar al backend sobre el logout si hay un refresh token
+  if (refresh_token) {
+    axios.post(`${API_BASE_URL}/api/logout`, { refresh_token })
+      .catch(err => {
+        console.warn('Error al notificar logout al backend:', err.message);
+      });
+  }
+
   jwtUtils.removeTokensFromCookie();
   window.location.href = '/'; // Redirigir a la página de login
 }
 
-export { fetchWithAuth, verificarYRenovarToken, logout};
+export { fetchWithAuth, verificarYRenovarToken, logout };
