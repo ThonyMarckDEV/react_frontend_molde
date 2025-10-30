@@ -15,7 +15,6 @@ async function validateRefreshToken() {
       return false;
     }
     
-    // El backend ahora espera el string del token
     const response = await axios.post(`${API_BASE_URL}/api/validate-refresh-token`, {
       refresh_token
     });
