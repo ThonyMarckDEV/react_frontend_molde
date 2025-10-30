@@ -14,7 +14,7 @@ async function verificarYRenovarToken() {
   const access_token = jwtUtils.getAccessTokenFromCookie();
   const refresh_token = jwtUtils.getRefreshTokenFromCookie();
 
-  // Si faltan tokens localmente, no tiene sentido llamar al backend.
+  // Si faltan tokens localmente, no llama al backend.
   if (!access_token || !refresh_token) {
     console.log('[Token] No se encontraron tokens locales. Sesión finalizada.');
     logout(); // Ejecuta el logout
@@ -30,7 +30,7 @@ async function verificarYRenovarToken() {
 
     const { valid, access_token: newAccessToken } = response.data;
 
-    // Si el backend dice que no es válido (aunque devuelva 200)
+    // Si el backend dice que no es válido
     if (!valid) {
       console.log('[Token] Backend reportó sesión no válida.');
       logout();
@@ -60,13 +60,11 @@ async function verificarYRenovarToken() {
  * Función wrapper para hacer fetch asegurando que el token es válido.
  */
 async function fetchWithAuth(url, options = {}) {
-  // console.log(`[API] Solicitud a: ${url}`);
-  
-  // Esta función ahora se encarga de todo: validar, renovar si es necesario,
+
+  // Esta función se encarga de todo: validar, renovar si es necesario,
   // o hacer logout y lanzar un error si la sesión es inválida.
   const access_token = await verificarYRenovarToken();
   
-  // console.log('[API] Enviando solicitud con token:', access_token?.substring(0, 15) + '...');
   const headers = {
     ...options.headers,
     Authorization: `Bearer ${access_token}`
