@@ -4,9 +4,9 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ProtectedRoute = ({ element }) => {
   // Obtener el JWT desde localStorage
-  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+  const access_token = jwtUtils.getAccessTokenFromCookie();
 
-  if (!refresh_token) {
+  if (!access_token) {
       return <Navigate to="/401" />;
   }
   // Si no hay token, se muestra el elemento original

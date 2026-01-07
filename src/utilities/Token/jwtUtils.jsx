@@ -23,7 +23,7 @@ export const getUsername = (token) => jwtDecode(token)?.username ?? null;
 export const getFullName = (token) => jwtDecode(token)?.fullName ?? null;
 
 // Función para obtener el rol del usuario
-export const getUserRole = (token) => jwtDecode(token)?.rol ?? null;
+export const getUserRole = (token) => jwtDecode(token)?.role ?? null;
 
 // Función para obtener el rol del usuario
 export const getEmail= (token) => jwtDecode(token)?.email ?? null;

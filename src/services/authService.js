@@ -1,10 +1,10 @@
 import axios from 'axios';
 import API_BASE_URL from 'js/urlHelper';
 
-const login = async (username, password, rememberMe) => {
+const login = async (email, password, rememberMe) => {
   const response = await axios.post(
-    `${API_BASE_URL}/api/login`,
-    { username, password, remember_me: rememberMe },
+    `${API_BASE_URL}/api/auth/login`,
+    { email, password, remember_me: rememberMe },
     {
       headers: {
         'Content-Type': 'application/json',
@@ -16,7 +16,7 @@ const login = async (username, password, rememberMe) => {
 
 const forgotPassword = async (dni) => {
   const response = await axios.post(
-    `${API_BASE_URL}/api/forgot-password`,
+    `${API_BASE_URL}/api/auth/forgot-password`,
     { dni },
     {
       headers: {

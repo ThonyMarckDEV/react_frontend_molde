@@ -7,7 +7,7 @@ import { logout } from 'js/logout';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 
 const menus = {
-    admin: [
+    ADMIN: [
         { 
             section: 'Roles', 
             subs: [
@@ -15,15 +15,7 @@ const menus = {
             ],
         },
     ],
-    contador: [
-        {
-            section: 'Prestamos',
-            subs: [
-                { name: 'Pagar Prestamo', link: '/cliente/pagar-prestamo' },
-            ],
-        },
-    ],
-    jefe_contabilidad: [
+    USER: [
         { section: 'Dashboard', link: '/asesor/dashboard' },
         {
             section:'Evaluaciones',
@@ -42,8 +34,8 @@ const Sidebar = () => {
     
     const location = useLocation();
 
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    const rol = refresh_token ? jwtUtils.getUserRole(refresh_token) : null;
+    const access_token = jwtUtils.getAccessTokenFromCookie();
+    const rol = access_token ? jwtUtils.getUserRole(access_token) : null;
 
     const roleMenu = useMemo(() => {
         return rol && menus[rol] ? menus[rol] : [];

@@ -4,16 +4,16 @@ import jwtUtils from 'utilities/Token/jwtUtils';
 
 const ProtectedRouteManager = ({ element }) => {
   // Obtener el JWT desde localStorage
-  const refresh_token = jwtUtils.getRefreshTokenFromCookie();
+  const access_token = jwtUtils.getAccessTokenFromCookie();
 
 
-  if (!refresh_token) {
+  if (!access_token) {
     return <Navigate to="/404" />;
   }
 
-  const rol = jwtUtils.getUserRole(refresh_token);
-
-  if (rol !== 'admin') {
+  const rol = jwtUtils.getUserRole(access_token);
+  
+  if (rol !== 'ADMIN') {
     return <Navigate to="/404" />;
   }
 

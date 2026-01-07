@@ -9,7 +9,8 @@ import ForgotPasswordForm from './components/ForgotPasswordForm';
 import authService from 'services/authService';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  // CAMBIO 1: Usamos 'email' en lugar de 'username'
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [dni, setDni] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,13 +18,13 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
-  // --- La lógica de las funciones permanece sin cambios ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const result = await authService.login(username, password, rememberMe);
+      // CAMBIO 2: Pasamos 'email' al servicio
+      const result = await authService.login(email, password, rememberMe);
       const { access_token, refresh_token} = result;
 
       const accessTokenExpiration = '; path=/; Secure; SameSite=Strict';
@@ -37,11 +38,11 @@ const Login = () => {
       const rol = jwtUtils.getUserRole(access_token);
 
       switch (rol) {
-        case 'admin':
+        case 'ADMIN':
           toast.success(`Login exitoso!!`);
           setTimeout(() => navigate('/admin'), 1500);
           break;
-        case 'usuario':
+        case 'USER':
           toast.success(`Login exitoso!!`);
           setTimeout(() => navigate('/usuario'), 1500);
           break;
@@ -108,9 +109,10 @@ const Login = () => {
               setShowForgotPassword={setShowForgotPassword}
             />
           ) : (
+            /* CAMBIO 3: Pasamos props de email */
             <LoginForm
-              username={username}
-              setUsername={setUsername}
+              email={email}
+              setEmail={setEmail}
               password={password}
               setPassword={setPassword}
               handleLogin={handleLogin}

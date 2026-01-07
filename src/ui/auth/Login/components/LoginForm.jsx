@@ -1,8 +1,8 @@
 import React from 'react';
 
 const LoginForm = ({
-  username,
-  setUsername,
+  email,        // CAMBIO: Recibe email
+  setEmail,     // CAMBIO: Recibe setEmail
   password,
   setPassword,
   handleLogin,
@@ -17,16 +17,17 @@ const LoginForm = ({
       </h2>
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-            Nombre de usuario
+          {/* CAMBIO: Label e Input para Email */}
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Correo electrónico
           </label>
           <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email" // Importante para validación de navegador
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
-            placeholder="Ingresa tu nombre de usuario"
+            placeholder="ejemplo@correo.com"
             required
           />
         </div>
