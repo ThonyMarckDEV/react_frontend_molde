@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import jwtUtils from 'utilities/Token/jwtUtils';
 import LoadingScreen from 'components/Shared/LoadingScreen';
@@ -84,7 +84,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-gray-100">
-      <ToastContainer position="top-right" />
 
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 sm:p-12">
         <div className="flex flex-col items-center text-center mb-10">
