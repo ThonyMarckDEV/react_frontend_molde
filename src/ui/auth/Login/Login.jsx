@@ -37,6 +37,10 @@ const Login = () => {
       const rol = jwtUtils.getUserRole(access_token);
 
       switch (rol) {
+        case 'superadmin':
+          toast.success(`Login exitoso!!`);
+          setTimeout(() => navigate('/superadmin'), 1500);
+          break;
         case 'admin':
           toast.success(`Login exitoso!!`);
           setTimeout(() => navigate('/admin'), 1500);

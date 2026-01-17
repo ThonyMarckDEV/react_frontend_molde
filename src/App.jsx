@@ -32,6 +32,7 @@ import ListarRoles from 'ui/Administrador/roles/listarRoles/ListarRoles';
 import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
 import ProtectedRouteUsuario from 'utilities/ProtectedRoutes/ProtectedRouteUsuario';
 import ProtectedRouteAdmin from 'utilities/ProtectedRoutes/ProtectedRouteAdmin';
+import ProtectedRouteSuperAdmin from 'utilities/ProtectedRoutes/ProtectedRouteSuperAdmin';
 
 
 function AppContent() {
@@ -42,6 +43,20 @@ function AppContent() {
         path="/"
         element={<ProtectedRouteHome element={<Login />} />}
       />
+
+      {/* RUTAS SUPERADMIN */}
+      <Route
+        path="/superadmin"
+        element={
+          <ProtectedRouteSuperAdmin element={<SidebarLayout />} />
+        }
+      >
+        {/* Ruta Home (cuando solo pones /superadmin) */}
+        <Route index element={<Home />} />
+
+
+      </Route>
+
 
       {/* RUTAS ADMIN */}
       <Route
