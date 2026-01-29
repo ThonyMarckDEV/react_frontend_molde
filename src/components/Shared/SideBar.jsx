@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bars3Icon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { 
+    Bars3Icon, 
+    ChevronDownIcon, 
+    ArrowRightOnRectangleIcon,
+    Squares2X2Icon, // Icono genérico para Dashboard
+    CubeIcon,       // Icono genérico para recursos
+    UserGroupIcon   // Icono genérico para usuarios
+} from '@heroicons/react/24/outline'; 
 import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
-//import logo from 'assets/img/logo.png';
 import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
+// import logoImg from 'assets/img/logo.png'; // Logo
 
 const menus = {
     admin: [
@@ -37,154 +44,170 @@ const menus = {
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
     const [openSection, setOpenSection] = useState(null); 
     const [showConfirm, setShowConfirm] = useState(false);
     
     const location = useLocation();
+    const access_token = jwtUtils.getAccessTokenFromCookie();
+    const rol = access_token ? jwtUtils.getUserRole(access_token) : null;
 
-    const refresh_token = jwtUtils.getRefreshTokenFromCookie();
-    const rol = refresh_token ? jwtUtils.getUserRole(refresh_token) : null;
+    const roleMenu = useMemo(() => rol && menus[rol] ? menus[rol] : [], [rol]);
 
-    const roleMenu = useMemo(() => {
-        return rol && menus[rol] ? menus[rol] : [];
-    }, [rol]);
-
-    const handleLogout = () => {
-        logout();
-        setShowConfirm(false);
+    const handleLogout = () => { logout(); setShowConfirm(false); };
+    
+    const toggleSection = (section) => { 
+        if (!isHovered && window.innerWidth >= 768) setIsHovered(true); 
+        setOpenSection(prev => prev === section ? null : section); 
     };
 
-    const toggleSection = (section) => {
-        setOpenSection(prevSection => prevSection === section ? null : section);
-    };
+    const handleMouseEnter = () => { if (window.innerWidth >= 768) setIsHovered(true); };
+    const handleMouseLeave = () => { if (window.innerWidth >= 768) setIsHovered(false); };
 
-    // isSectionActive usa useCallback y solo depende de location.pathname
     const isSectionActive = useCallback((item) => {
-        if (item.link && location.pathname.startsWith(item.link)) {
-            return true;
-        }
-        if (item.subs) {
-            return item.subs.some(sub => location.pathname.startsWith(sub.link));
+        if (item.subs) return item.subs.some(sub => location.pathname.startsWith(sub.link));
+        if (item.link) {
+            // Ajustar lógica de home si es necesario
+            if (item.link === '/admin' || item.link === '/cajero') return location.pathname === item.link;
+            return location.pathname.startsWith(item.link);
         }
         return false;
-    }, [location.pathname]); 
+    }, [location.pathname]);
     
-    // useEffect ahora tiene todas sus dependencias estables y correctas.
     useEffect(() => {
         if (openSection === null) {
             const activeItem = roleMenu.find(item => isSectionActive(item));
-            
-            if (activeItem && activeItem.subs) {
-                setOpenSection(activeItem.section);
-            }
+            if (activeItem && activeItem.subs) setOpenSection(activeItem.section);
         }
     }, [location.pathname, roleMenu, isSectionActive, openSection]); 
 
+    const sidebarWidth = isHovered ? 'md:w-72' : 'md:w-20';
 
     return (
         <>
-            {/* Hamburger button for mobile */}
-            <button
-                className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-black"
-                onClick={() => setIsOpen(!isOpen)}
-            >
-                <Bars3Icon className="h-6 w-6 text-gray-800" />
+            <style>{`
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+            `}</style>
+
+            {/* Botón Móvil (Negro) */}
+            <button className="md:hidden fixed top-4 left-4 z-50 p-2 bg-black text-white rounded-md shadow-lg" onClick={() => setIsOpen(!isOpen)}>
+                <Bars3Icon className="h-6 w-6" />
             </button>
 
-            {/* Sidebar */}
+            {/* Sidebar Container */}
             <div
-                className={`fixed left-0 top-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out z-40 ${
-                    isOpen ? 'translate-x-0' : '-translate-x-full'
-                } md:translate-x-0 md:fixed md:block`}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                className={`fixed left-0 top-0 h-screen bg-white border-r border-gray-200 shadow-sm z-40 transition-all duration-300 ease-in-out flex flex-col
+                    ${isOpen ? 'translate-x-0 w-72' : '-translate-x-full'} 
+                    ${sidebarWidth} md:translate-x-0`}
             >
-                {/* Top half: White with image */}
-                <div className="h-1/4 bg-white flex items-center justify-center">
-                    <img
-                        src={''}
-                        alt="Logo"
-                        className="h-36 w-auto"
-                    />
+                {/* 1. HEADER (Logo Genérico o Texto) */}
+                <div className={`flex items-center justify-center flex-shrink-0 border-b border-gray-100 transition-all duration-300
+                    ${isHovered ? 'h-24' : 'h-20'}`}>
+                    
+                    {/* Placeholder de Logo: Cuadrado Negro con Letra */}
+                    <div className={`bg-black text-white flex items-center justify-center font-bold rounded-lg transition-all duration-300
+                        ${isHovered ? 'w-10 h-10 text-xl' : 'w-10 h-10 text-xl'}`}>
+                        S
+                    </div>
+                    
+                    {/* Texto del sistema (Solo visible si expandido) */}
+                    <div className={`ml-3 font-bold text-lg tracking-tight overflow-hidden transition-all duration-300 whitespace-nowrap
+                        ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                        SISTEMA<span className="text-gray-400">ADMIN</span>
+                    </div>
                 </div>
 
-                {/* Bottom half: Red with menu */}
-                <div className="h-3/4 bg-gray-500 overflow-y-auto p-4 flex flex-col">
-                    <nav className="space-y-2 flex-grow">
-                        {roleMenu.map((item, index) => {
-                            const isActive = isSectionActive(item); 
-                            const isSubOpen = item.subs && openSection === item.section; 
+                {/* 2. BODY (Menú) */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden py-6 space-y-2 hide-scrollbar px-3">
+                    {roleMenu.map((item, index) => {
+                        const isActive = isSectionActive(item); 
+                        const isSubOpen = item.subs && openSection === item.section; 
+                        const IconComponent = item.icon || CubeIcon;
+                        
+                        // Estilos Neutros
+                        const itemBaseClasses = "flex items-center w-full p-3 rounded-lg transition-all duration-200 group relative";
+                        const activeClasses = "bg-black text-white shadow-lg shadow-gray-200"; 
+                        const inactiveClasses = "text-gray-600 hover:bg-gray-100 hover:text-black"; 
+                        
+                        return (
+                            <div key={index}>
+                                {item.subs ? (
+                                    <>
+                                        <button 
+                                            onClick={() => toggleSection(item.section)} 
+                                            className={`${itemBaseClasses} ${isActive && !isHovered ? 'bg-gray-100 text-black' : (isActive ? activeClasses : inactiveClasses)}`}
+                                            title={!isHovered ? item.section : ''}
+                                        >
+                                            <IconComponent className="h-6 w-6 flex-shrink-0" /> 
+                                            
+                                            <span className={`ml-3 font-medium whitespace-nowrap overflow-hidden transition-all duration-300
+                                                ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                                                {item.section}
+                                            </span>
 
-                            return (
-                                <div key={index}>
-                                    {item.subs ? (
-                                        <>
-                                            <button
-                                                className={`w-full flex items-center justify-between py-2 px-4 rounded-md transition focus:outline-none 
-                                                            ${isActive ? 'bg-gray-600 text-white' : 'text-white hover:bg-gray-400'}`} 
-                                                onClick={() => toggleSection(item.section)}
-                                            >
-                                                <span>{item.section}</span>
-                                                <ChevronDownIcon
-                                                    className={`h-5 w-5 transform transition-transform ${
-                                                        isSubOpen ? 'rotate-180' : ''
-                                                    }`}
-                                                />
-                                            </button>
-                                            {isSubOpen && ( 
-                                                <ul className="ml-4 space-y-1">
-                                                    {item.subs.map((sub, subIndex) => (
-                                                        <li key={subIndex}>
-                                                            <Link
-                                                                to={sub.link}
-                                                                className={`block py-1 px-4 rounded-md transition text-sm ${
-                                                                    location.pathname.startsWith(sub.link)
-                                                                        ? 'bg-gray-400 text-white font-semibold' 
-                                                                        : 'text-white hover:bg-gray-400' 
-                                                                }`}
-                                                                onClick={() => setIsOpen(false)}
-                                                            >
+                                            {(isHovered || window.innerWidth < 768) && (
+                                                <ChevronDownIcon className={`ml-auto h-4 w-4 transition-transform duration-300 ${isSubOpen ? 'rotate-180' : ''}`}/>
+                                            )}
+                                        </button>
+
+                                        {/* Submenú */}
+                                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSubOpen ? 'max-h-96 opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                                            {(isHovered || window.innerWidth < 768) && (
+                                                <ul className="ml-4 pl-4 border-l border-gray-200 space-y-1">
+                                                    {item.subs.map((sub, idx) => (
+                                                        <li key={idx}>
+                                                            <Link to={sub.link} onClick={() => setIsOpen(false)} 
+                                                                className={`block py-2 px-3 rounded-md text-sm font-medium transition-colors
+                                                                ${location.pathname.startsWith(sub.link) 
+                                                                    ? 'text-black bg-gray-50' 
+                                                                    : 'text-gray-500 hover:text-black hover:bg-gray-50'}`}>
                                                                 {sub.name}
                                                             </Link>
                                                         </li>
                                                     ))}
                                                 </ul>
                                             )}
-                                        </>
-                                    ) : (
-                                        <Link
-                                            to={item.link}
-                                            className={`block py-2 px-4 rounded-md transition ${
-                                                isActive ? 'bg-black text-white' : 'text-white hover:bg-gray-400'
-                                            }`}
-                                            onClick={() => setIsOpen(false)}
-                                        >
+                                        </div>
+                                    </>
+                                ) : (
+                                    <Link to={item.link} onClick={() => setIsOpen(false)} 
+                                        className={`${itemBaseClasses} ${isActive ? activeClasses : inactiveClasses}`}
+                                        title={!isHovered ? item.section : ''}
+                                    >
+                                        <IconComponent className="h-6 w-6 flex-shrink-0" />
+                                        <span className={`ml-3 font-medium whitespace-nowrap overflow-hidden transition-all duration-300
+                                            ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                                             {item.section}
-                                        </Link>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Logout button at the bottom */}
-                    <div className="mt-auto p-4 border-t border-white">
-                        <button
-                            onClick={() => setShowConfirm(true)}
-                            className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-400 text-black px-4 py-2 rounded-md transition focus:outline-none focus:ring-2 focus:ring-gray-500"
-                        >
-                            Cerrar Sesión
-                        </button>
-                    </div>
+                                        </span>
+                                    </Link>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
 
+                {/* 3. FOOTER (Logout) */}
+                <div className="p-4 border-t border-gray-100 flex-shrink-0">
+                    <button onClick={() => setShowConfirm(true)} 
+                        className={`flex items-center w-full p-3 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 group
+                        ${!isHovered ? 'justify-center' : ''}`} 
+                        title="Cerrar Sesión">
+                        
+                        <ArrowRightOnRectangleIcon className="h-6 w-6 flex-shrink-0" />
+                        
+                        <span className={`ml-3 whitespace-nowrap overflow-hidden transition-all duration-300 font-medium
+                            ${!isHovered ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
+                            Salir
+                        </span>
+                    </button>
+                </div>
             </div>
 
-            {/* MODAL ConfirmModal */}
             {showConfirm && (
-                <ConfirmModal
-                    message="¿Estás seguro/a de cerrar sesión?"
-                    onConfirm={handleLogout}
-                    onCancel={() => setShowConfirm(false)}
-                />
+                <ConfirmModal message="¿Deseas cerrar sesión del sistema?" onConfirm={handleLogout} onCancel={() => setShowConfirm(false)} />
             )}
         </>
     );

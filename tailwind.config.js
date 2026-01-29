@@ -1,31 +1,22 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
-      keyframes: {
-        'move-stars': {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' }
+      colors: {
+        primary: {
+          DEFAULT: '#000000', // Negro absoluto (Acciones principales)
+          hover: '#27272a',   // Zinc-800 (Hover suave)
+          light: '#f4f4f5',   // Zinc-100 (Fondos de selección suave)
         },
-        'star-sparkle': {
-          '0%, 100%': { 
-            opacity: '0.7',
-            transform: 'scale(1)',
-            boxShadow: '0 0 4px 1px rgba(255,255,255,0.5)'
-          },
-          '50%': { 
-            opacity: '0.3',
-            transform: 'scale(0.8)',
-            boxShadow: '0 0 8px 3px rgba(255,255,255,0.8)'
-          }
+        secondary: {
+          DEFAULT: '#ffffff', // Blanco
+          text: '#374151',    // Gris-700 (Texto legible)
+          muted: '#9ca3af',   // Gris-400 (Textos secundarios)
         }
       },
-      animation: {
-        'move-stars': 'move-stars 20s linear infinite',
-        'star-sparkle': 'star-sparkle 3s infinite'
-      }
     }
   },
   plugins: [],
