@@ -57,6 +57,8 @@ function AppContent() {
       >
         {/* Ruta Home (cuando solo pones /superadmin) */}
         <Route index element={<Home />} />
+        
+        <Route path="listar-roles" element={<ListarRoles />} />
 
 
       </Route>

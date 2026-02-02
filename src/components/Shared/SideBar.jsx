@@ -4,9 +4,7 @@ import {
     Bars3Icon, 
     ChevronDownIcon, 
     ArrowRightOnRectangleIcon,
-    Squares2X2Icon, // Icono genérico para Dashboard
-    CubeIcon,       // Icono genérico para recursos
-    UserGroupIcon   // Icono genérico para usuarios
+    CubeIcon,
 } from '@heroicons/react/24/outline'; 
 import jwtUtils from 'utilities/Token/jwtUtils';
 import { logout } from 'js/logout';
@@ -14,6 +12,14 @@ import ConfirmModal from 'components/Shared/Modals/ConfirmModal';
 // import logoImg from 'assets/img/logo.png'; // Logo
 
 const menus = {
+    superadmin: [
+        { 
+            section: 'Roles', 
+            subs: [
+                { name: 'Listar Roles', link: '/superadmin/listar-roles' },
+            ],
+        },
+    ],
     admin: [
         { 
             section: 'Roles', 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {FadeLoader, PropagateLoader } from 'react-spinners';
+import {FadeLoader} from 'react-spinners';
 
 const LoadingScreen = () => {
   return (
